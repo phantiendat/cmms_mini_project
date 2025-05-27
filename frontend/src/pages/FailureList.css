@@ -1,0 +1,163 @@
+/* .failure-list-container {
+  background-color: #f8f9fa;
+} */
+
+.failure-list-left {
+  background-color: #fff;
+  border-right: 1px solid #dee2e6;
+}
+
+.failure-detail-card {
+  background-color: #fff;
+}
+
+.search-input {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.detail-section {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+}
+
+.description-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.custom-fields {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.custom-fields pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.empty-state h5 {
+  margin-bottom: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.asset-link {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.asset-link:hover {
+  text-decoration: underline;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+}
+
+.loading-container p {
+  margin-top: 10px;
+}
+
+/* Custom scrollbar */
+.failure-list-left::-webkit-scrollbar,
+.failure-detail-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.failure-list-left::-webkit-scrollbar-track,
+.failure-detail-card::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.failure-list-left::-webkit-scrollbar-thumb,
+.failure-detail-card::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.failure-list-left::-webkit-scrollbar-thumb:hover,
+.failure-detail-card::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* List item styles */
+.list-group-item {
+  border-left: none;
+  border-right: none;
+  padding: 12px 15px;
+}
+
+.list-group-item:first-child {
+  border-top: none;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.list-group-item.active {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  color: #212529;
+}
+
+/* Badge styles */
+.badge {
+  font-weight: 500;
+  padding: 5px 8px;
+  margin-right: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .failure-list-container {
+    padding: 10px;
+  }
+  
+  .detail-section {
+    padding: 10px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+
+.failure-list-left .list-group-item.active {
+    background-color: #007bff; /* Màu nền mặc định của Bootstrap active */
+    border-color: #007bff; /* Màu border mặc định của Bootstrap active */
+    color: white; /* Đổi màu chữ thành trắng */
+}
+
+.failure-list-left .list-group-item.active small {
+    color: white !important; /* Đảm bảo màu chữ trắng cho các phần tử nhỏ bên trong */
+} 

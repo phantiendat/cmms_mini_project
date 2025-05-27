@@ -1,0 +1,10 @@
+
+.action-list-left .list-group-item.active {
+    background-color: #007bff; /* Màu nền mặc định của Bootstrap active */
+    border-color: #007bff; /* Màu border mặc định của Bootstrap active */
+    color: white; /* Đổi màu chữ thành trắng */
+}
+
+.action-list-left .list-group-item.active small {
+    color: white !important; /* Đảm bảo màu chữ trắng cho các phần tử nhỏ bên trong */
+} 

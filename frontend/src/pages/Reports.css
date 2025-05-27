@@ -1,0 +1,63 @@
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.report-table th,
+.report-table td {
+  padding: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.report-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.report-table td.description-cell,
+.report-table td.resolution-details-cell {
+  min-width: 250px;
+  max-width: 250px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.report-table td.asset-code-cell {
+  font-family: monospace;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.report-table td {
+  vertical-align: middle;
+}
+
+/* Style cho các badge */
+.report-table .badge {
+  font-size: 0.8rem;
+  padding: 0.4em 0.6em;
+}
+
+/* Style cho các cột số */
+.report-table td[data-type="number"] {
+  text-align: right;
+}
+
+/* Style cho các cột thời gian */
+.report-table td[data-type="datetime"] {
+  white-space: nowrap;
+}
+
+/* Style cho các cột mô tả */
+.report-table td[data-type="description"] {
+  max-width: 250px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+} 
