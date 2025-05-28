@@ -75,7 +75,7 @@ class AssetService {
       name: data.name,
       location: data.location,
       system: data.system,
-      specifications: data.specifications || {},
+      specifications: data.specifications || '',
       custom_fields: data.custom_fields || {}
     });
   }

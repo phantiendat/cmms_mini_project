@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const assetController = require('../controllers/asset.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 // Tất cả các routes đều yêu cầu xác thực
 router.use(authMiddleware.verifyToken);

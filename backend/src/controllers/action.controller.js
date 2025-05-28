@@ -34,7 +34,10 @@ exports.create = async (req, res) => {
       custom_fields: req.body.custom_fields || {}
     });
 
-    res.status(201).json(action);
+    res.status(201).json({
+      message: "Action created successfully",
+      data: action
+    });
   } catch (error) {
     res.status(500).send({
       message: error.message || "Some error occurred while creating the action."
@@ -51,7 +54,10 @@ exports.getAll = async (req, res) => {
         attributes: ['code', 'name']
       }]
     });
-    res.status(200).json(actions);
+    res.status(200).json({
+      message: "Actions retrieved successfully",
+      data: actions
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -63,14 +69,24 @@ exports.getByAsset = async (req, res) => {
     const assetId = req.params.assetId;
     const { startDate, endDate } = req.query;
     
+    const whereClause = { asset_id: assetId };
+    
+    // Thêm điều kiện lọc ngày nếu có
+    if (startDate && endDate) {
+      whereClause.performed_at = {
+        [Op.between]: [startDate, endDate]
+      };
+    } else if (startDate) {
+      whereClause.performed_at = { [Op.gte]: startDate };
+    } else if (endDate) {
+      whereClause.performed_at = { [Op.lte]: endDate };
+    }
+
     const actions = await Action.findAll({
-      where: {
-        asset_id: assetId,
-        performed_at: {
-          [Op.between]: [startDate, endDate]
-        }
-      }
+      where: whereClause,
+      order: [['performed_at', 'DESC']]
     });
+    
     res.status(200).json(actions);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -9,7 +9,10 @@ exports.create = async (req, res) => {
       status: req.body.status || 'Open'
     };
     const failure = await FailureService.create(failureData);
-    res.status(201).json(failure);
+    res.status(201).json({
+      message: "Failure created successfully",
+      data: failure
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -25,7 +28,10 @@ exports.getAll = async (req, res) => {
       }],
       order: [['detected_at', 'DESC']]
     });
-    res.status(200).json(failures);
+    res.status(200).json({
+      message: "Failures retrieved successfully",
+      data: failures
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -38,7 +44,10 @@ exports.getByAsset = async (req, res) => {
     const { startDate, endDate } = req.query;
     
     const failures = await FailureService.getByAsset(assetId, startDate, endDate);
-    res.status(200).json(failures);
+    res.status(200).json({
+      message: "Failures retrieved successfully",
+      data: failures
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -52,7 +61,10 @@ exports.getById = async (req, res) => {
     if (!failure) {
       return res.status(404).json({ message: 'Failure not found' });
     }
-    res.status(200).json(failure);
+    res.status(200).json({
+      message: "Failure retrieved successfully",
+      data: failure
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -78,7 +90,10 @@ exports.update = async (req, res) => {
     };
 
     const failure = await FailureService.update(id, updatedData);
-    res.status(200).json(failure);
+    res.status(200).json({
+      message: "Failure updated successfully",
+      data: failure
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

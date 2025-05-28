@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     },
     specifications: {
-      type: DataTypes.JSON
+      type: DataTypes.TEXT
     },
     custom_fields: {
       type: DataTypes.JSON
