@@ -59,17 +59,18 @@ const ActionForm = () => {
     const fetchAssets = async () => {
       try {
         const response = await AssetService.getAll();
-        setAssets(response.data);
+        setAssets(response.data.data || []);
         
         // Nếu đang edit, lấy asset code
         if (id && assetId) {
-          const asset = response.data.find(a => a.id === assetId);
+          const asset = (response.data.data || []).find(a => a.id === assetId);
           if (asset) {
             setAssetCode(asset.code);
           }
         }
       } catch (error) {
         console.error('Failed to fetch assets:', error);
+        setError('Failed to fetch assets. ' + (error.response?.data?.message || error.message));
       }
     };
     
@@ -132,11 +133,11 @@ const ActionForm = () => {
   // Hàm xử lý khi submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
     try {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+
       let parsedCustomFields;
       try {
         parsedCustomFields = JSON.parse(customFields);
@@ -146,7 +147,7 @@ const ActionForm = () => {
         return;
       }
 
-      const formData = {
+      const submitData = {
         asset_id: assetId,
         type,
         description,
@@ -158,13 +159,11 @@ const ActionForm = () => {
         custom_fields: parsedCustomFields
       };
 
-      if (id) {
-        await ActionService.update(id, formData);
+      if (isEditMode) {
+        await ActionService.update(id, submitData);
         setSuccess('Action updated successfully');
-        // Chuyển hướng về trang danh sách ngay lập tức sau khi cập nhật thành công
-        navigate('/actions');
       } else {
-        await ActionService.create(formData);
+        await ActionService.create(submitData);
         setSuccess('Action created successfully');
         // Reset form sau khi tạo mới thành công
         setAssetId(assetIdFromQuery || '');
@@ -176,16 +175,11 @@ const ActionForm = () => {
         setPerformedAt(new Date().toISOString().slice(0, 16));
         setSeverity('medium');
         setCustomFields('{}');
-        
-        // Chuyển hướng về trang danh sách sau 2 giây
-        setTimeout(() => {
-          if (assetIdFromQuery) {
-            navigate(`/assets/${assetIdFromQuery}`);
-          } else {
-            navigate('/actions');
-          }
-        }, 2000);
       }
+      
+      setTimeout(() => {
+        navigate('/actions');
+      }, 2000);
     } catch (err) {
       setError('Failed to save action. ' + (err.response?.data?.message || err.message));
     } finally {

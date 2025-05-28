@@ -19,12 +19,9 @@ const AssetForm = () => {
     name: '',
     location: '',
     system: '',
-    specifications: {},
+    specifications: '',
     custom_fields: {}
   });
-  
-  // State lưu trữ chuỗi JSON của technicalSpecs
-  const [technicalSpecs, setTechnicalSpecs] = useState('');
   
   // State theo dõi trạng thái loading
   const [loading, setLoading] = useState(false);
@@ -43,13 +40,12 @@ const AssetForm = () => {
           setFetchLoading(true);
           // Gọi service để lấy thông tin tài sản theo id
           const response = await AssetService.get(id);
+          console.log('Asset Response:', response);
+          console.log('Asset Data:', response.data);
           // Cập nhật state với dữ liệu nhận được
-          setFormData(response.data);
-          // Chuyển đổi specifications thành chuỗi JSON nếu có
-          if (response.data.specifications) {
-            setTechnicalSpecs(JSON.stringify(response.data.specifications, null, 2));
-          }
+          setFormData(response.data.data);
         } catch (err) {
+          console.error('Error fetching asset:', err);
           setError('Failed to fetch asset details. ' + (err.response?.data?.message || err.message));
         } finally {
           setFetchLoading(false);
@@ -78,31 +74,25 @@ const AssetForm = () => {
       setSuccess('');
 
       const submitData = {
-        ...formData,
-        specifications: technicalSpecs ? JSON.parse(technicalSpecs) : {}
+        ...formData
       };
 
       if (isEditMode) {
-        // Gọi service để cập nhật tài sản
         await AssetService.update(id, submitData);
         setSuccess('Asset updated successfully');
       } else {
-        // Gọi service để tạo mới tài sản
         await AssetService.create(submitData);
         setSuccess('Asset created successfully');
-        // Reset form sau khi tạo mới thành công
         setFormData({
           code: '',
           name: '',
           location: '',
           system: '',
-          specifications: {},
+          specifications: '',
           custom_fields: {}
         });
-        setTechnicalSpecs('');
       }
       
-      // Chuyển hướng về trang danh sách tài sản sau 2 giây
       setTimeout(() => {
         navigate('/assets');
       }, 2000);
@@ -205,16 +195,17 @@ const AssetForm = () => {
             <Row>
               <Col md={12}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Technical Specifications (JSON format)</Form.Label>
+                  <Form.Label>Technical Specifications</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={3}
-                    placeholder={`Example: {"temperature": "30°C", "pressure": "10 bar"}`}
-                    value={technicalSpecs}
-                    onChange={(e) => setTechnicalSpecs(e.target.value)}
+                    name="specifications"
+                    value={formData.specifications}
+                    onChange={handleChange}
+                    placeholder="Enter technical specifications"
                   />
                   <Form.Text className="text-muted">
-                    Enter technical specifications in JSON format.
+                    Enter technical specifications in plain text format.
                   </Form.Text>
                 </Form.Group>
               </Col>

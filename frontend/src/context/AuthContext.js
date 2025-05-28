@@ -11,8 +11,13 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = () => {
       try {
         const currentUser = AuthService.getCurrentUser();
-        if (currentUser) {
+        const token = localStorage.getItem('token');
+        
+        if (currentUser && token) {
           setUser(currentUser);
+        } else {
+          // Nếu không có user hoặc token, xóa cả hai
+          AuthService.logout();
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -28,8 +33,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const userData = await AuthService.login(username, password);
-      setUser(userData);
-      return userData;
+      if (userData) {
+        setUser(userData);
+        return userData;
+      }
+      throw new Error('Invalid login response');
     } catch (error) {
       console.error('Login error:', error);
       AuthService.logout();

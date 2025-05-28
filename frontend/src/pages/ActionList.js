@@ -29,19 +29,22 @@ const ActionList = () => {
         ActionService.getAll(),
         AssetService.getAll()
       ]);
-      setActions(actionsResponse.data);
-      setAssets(assetsResponse.data);
+      
+      // Sắp xếp actions theo created_at giảm dần (mới nhất lên đầu)
+      const sortedActions = (actionsResponse.data.data || []).sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+      
+      setActions(sortedActions);
+      setAssets(assetsResponse.data.data || []);
       setError('');
     } catch (err) {
-      // Xử lý lỗi nếu có
       setError('Failed to fetch data. ' + (err.response?.data?.message || err.message));
     } finally {
-      // Đánh dấu đã tải xong dữ liệu
       setLoading(false);
     }
   };
 
-  // useEffect hook để tải dữ liệu khi component được render
   useEffect(() => {
     fetchData();
   }, []);
@@ -167,35 +170,32 @@ const ActionList = () => {
                     return <ListGroup.Item className="text-center">No matching actions found</ListGroup.Item>;
                   }
 
-                  return filteredActions.map((action) => {
-                    // const asset = getAssetInfo(action.asset_id);
-                    return (
-                      <ListGroup.Item
-                        key={action.id}
-                        action
-                        active={selectedAction?.id === action.id}
-                        onClick={() => setSelectedAction(action)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="d-flex justify-content-between align-items-start">
-                          <div>
-                            <div className="d-flex justify-content-between align-items-center gap-2 mb-1">
-                              <div style={{ minWidth: '250px' }}>
-                                {getStatusBadge(action.status)}
-                                <span className="ms-1">{getSeverityBadge(action.severity)}</span>
-                              </div>
-                              <small className="text-muted">{formatDateTime(action.performed_at)}</small>
+                  return filteredActions.map((action) => (
+                    <ListGroup.Item
+                      key={action.id}
+                      action
+                      active={selectedAction?.id === action.id}
+                      onClick={() => setSelectedAction(action)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div className="d-flex justify-content-between align-items-center gap-2 mb-1">
+                            <div style={{ minWidth: '230px' }}>
+                              {getStatusBadge(action.status)}
+                              <span className="ms-1">{getSeverityBadge(action.severity)}</span>
                             </div>
-                            <h6>{action.Asset ? action.Asset.code : `Asset ID: ${action.asset_id}`}</h6>
-                            <small className="d-block text-muted mt-1">Type: {action.type || 'N/A'}</small>
-                            <small className="d-block text-truncate text-muted" style={{ maxWidth: '350px' }}>
-                              {action.description || 'No description'}
-                            </small>
+                            <small className="text-muted">{formatDateTime(action.created_at)}</small>
                           </div>
+                          <h6>{action.Asset ? action.Asset.code : `Asset ID: ${action.asset_id}`}</h6>
+                          <small className="d-block text-muted mt-1">Type: {action.type || 'N/A'}</small>
+                          <small className="d-block text-truncate text-muted" style={{ maxWidth: '350px' }}>
+                            {action.description || 'No description'}
+                          </small>
                         </div>
-                      </ListGroup.Item>
-                    );
-                  });
+                      </div>
+                    </ListGroup.Item>
+                  ));
                 })()}
               </ListGroup>
             </Card>

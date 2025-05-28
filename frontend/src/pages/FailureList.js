@@ -21,8 +21,13 @@ const FailureList = () => {
         FailureService.getAll(),
         AssetService.getAll()
       ]);
-      setFailures(failuresResponse.data);
-      setAssets(assetsResponse.data);
+      
+      const sortedFailures = (failuresResponse.data.data || []).sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+      
+      setFailures(sortedFailures);
+      setAssets(assetsResponse.data.data || []);
       setError('');
     } catch (err) {
       setError('Failed to fetch data. ' + (err.response?.data?.message || err.message));
@@ -124,8 +129,8 @@ const FailureList = () => {
                   const filteredFailures = failures.filter(failure => {
                     const asset = getAssetInfo(failure.asset_id);
                     return (
+                      (failure.type && failure.type.toLowerCase().includes(lowerCaseQuery)) ||
                       (failure.status && failure.status.toLowerCase().includes(lowerCaseQuery)) ||
-                      (failure.severity && failure.severity.toLowerCase().includes(lowerCaseQuery)) ||
                       (failure.description && failure.description.toLowerCase().includes(lowerCaseQuery)) ||
                       (asset.code && asset.code.toLowerCase().includes(lowerCaseQuery)) ||
                       (asset.name && asset.name.toLowerCase().includes(lowerCaseQuery)) ||
@@ -137,34 +142,32 @@ const FailureList = () => {
                     return <ListGroup.Item className="text-center">No matching failures found</ListGroup.Item>;
                   }
 
-                  return filteredFailures.map((failure) => {
-                    return (
-                      <ListGroup.Item
-                        key={failure.id}
-                        action
-                        active={selectedFailure?.id === failure.id}
-                        onClick={() => setSelectedFailure(failure)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="d-flex justify-content-between align-items-start">
-                          <div>
-                            <div className="d-flex justify-content-between align-items-center gap-2 mb-1">
-                              <div style={{ minWidth: '250px' }}>
-                                {getStatusBadge(failure.status)}
-                                <span className="ms-1">{getSeverityBadge(failure.severity)}</span>
-                              </div>
-                              <small className="text-muted">{formatDateTime(failure.detected_at)}</small>
+                  return filteredFailures.map((failure) => (
+                    <ListGroup.Item
+                      key={failure.id}
+                      action
+                      active={selectedFailure?.id === failure.id}
+                      onClick={() => setSelectedFailure(failure)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div className="d-flex justify-content-between align-items-center gap-2 mb-1">
+                            <div style={{ minWidth: '230px' }}>
+                              {getStatusBadge(failure.status)}
+                              <span className="ms-1">{getSeverityBadge(failure.severity)}</span>
                             </div>
-                            <h6>{failure.Asset ? failure.Asset.code : `Asset ID: ${failure.asset_id}`}</h6>
-                            <small className="d-block text-muted mt-1">Type: {failure.type || 'N/A'}</small>
-                            <small className="d-block text-truncate text-muted" style={{ maxWidth: '350px' }}>
-                              {failure.description || 'No description'}
-                            </small>
+                            <small className="text-muted">{formatDateTime(failure.created_at)}</small>
                           </div>
+                          <h6>{failure.Asset ? failure.Asset.code : `Asset ID: ${failure.asset_id}`}</h6>
+                          <small className="d-block text-muted mt-1">Type: {failure.type || 'N/A'}</small>
+                          <small className="d-block text-truncate text-muted" style={{ maxWidth: '350px' }}>
+                            {failure.description || 'No description'}
+                          </small>
                         </div>
-                      </ListGroup.Item>
-                    );
-                  });
+                      </div>
+                    </ListGroup.Item>
+                  ));
                 })()}
               </ListGroup>
             </Card>
@@ -226,8 +229,8 @@ const FailureList = () => {
                           <p>{selectedFailure.reported_by || 'N/A'}</p>
                         </div>
                         <div className="mb-3">
-                          <h6>Assigned To</h6>
-                          <p>{selectedFailure.assigned_to || 'N/A'}</p>
+                          <h6>Resolved By</h6>
+                          <p>{selectedFailure.resolved_by || 'N/A'}</p>
                         </div>
                       </Col>
                       <Col md={6}>

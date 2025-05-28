@@ -34,7 +34,6 @@ const failureReportColumns = [
 // Định nghĩa thứ tự cột cho báo cáo actions by month
 const actionMonthColumns = [
   { key: 'no', label: 'No.' },
-  { key: 'id', label: 'ID' },
   { key: 'asset_id', label: 'Asset ID' },
   { key: 'asset_code', label: 'Asset Code' },
   { key: 'asset_name', label: 'Asset Name' },
@@ -42,11 +41,11 @@ const actionMonthColumns = [
   { key: 'description', label: 'Description' },
   { key: 'severity', label: 'Severity' },
   { key: 'status', label: 'Status' },
+  { key: 'performed_by', label: 'Performed By' },
+  { key: 'created_by', label: 'Created By' },
   { key: 'created_at_formatted', label: 'Created At' },
   { key: 'performed_at_formatted', label: 'Performed At' },
-  { key: 'updated_at_formatted', label: 'Updated At' },
-  { key: 'performed_by', label: 'Performed By' },
-  { key: 'created_by', label: 'Created By' }
+  { key: 'updated_at_formatted', label: 'Updated At' }
 ];
 
 // Định nghĩa thứ tự cột cho báo cáo lịch sử
@@ -112,7 +111,7 @@ const Reports = () => {
     const fetchAssets = async () => {
       try {
         const response = await AssetService.getAll();
-        setAssets(response.data);
+        setAssets(response.data.data || []);
       } catch (err) {
         setError('Failed to fetch assets. ' + (err.response?.data?.message || err.message));
       }
@@ -201,7 +200,7 @@ const Reports = () => {
       switch (reportType) {
         case 'failures_by_asset':
           const response = await FailureService.getByAsset(selectedAsset, startDateISO, endDateISO);
-          responseData = response.data;
+          responseData = response.data.data || [];
           const asset = assets.find(a => a.id === Number(selectedAsset));
           reportTitle = `Failures for Asset ${asset ? asset.code + ' - ' + asset.name : selectedAsset}`;
           columnOrder = failureReportColumns;
@@ -234,10 +233,10 @@ const Reports = () => {
 
         case 'actions_by_month':
           const actionsResponse = await ActionService.getAll();
-          const allAssets = assets.length > 0 ? assets : (await AssetService.getAll()).data;
+          const allAssets = assets.length > 0 ? assets : (await AssetService.getAll()).data.data || [];
           setAssets(allAssets);
 
-          responseData = actionsResponse.data.filter(action => {
+          responseData = (actionsResponse.data.data || []).filter(action => {
             if (!action.performed_at) return false;
             const actionDate = new Date(action.performed_at);
             return actionDate.getFullYear() === parseInt(selectedYear) && 

@@ -28,12 +28,13 @@ const AssetList = () => {
       // Gọi service để lấy tất cả tài sản
       const response = await AssetService.getAll();
       // Cập nhật state với dữ liệu nhận được
-      setAssets(response.data);
-      setFilteredAssets(response.data);
+      const assetsData = response.data.data || [];
+      setAssets(assetsData);
+      setFilteredAssets(assetsData);
       
       // Trích xuất danh sách hệ thống và vị trí duy nhất để sử dụng trong bộ lọc
-      const uniqueSystems = [...new Set(response.data.map(asset => asset.system))].filter(Boolean);
-      const uniqueLocations = [...new Set(response.data.map(asset => asset.location))].filter(Boolean);
+      const uniqueSystems = [...new Set(assetsData.map(asset => asset.system))].filter(Boolean);
+      const uniqueLocations = [...new Set(assetsData.map(asset => asset.location))].filter(Boolean);
       
       setSystems(uniqueSystems);
       setLocations(uniqueLocations);
@@ -86,9 +87,7 @@ const AssetList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this asset?')) {
       try {
-        // Gọi service để xóa tài sản
         await AssetService.remove(id);
-        // Tải lại danh sách tài sản sau khi xóa
         fetchAssets();
         alert('Asset deleted successfully');
       } catch (err) {

@@ -45,14 +45,18 @@ const Dashboard = () => {
         const actionsResponse = await ActionService.getAll();
         const failuresResponse = await FailureService.getAll();
         
+        const assets = assetsResponse.data.data || [];
+        const actions = actionsResponse.data.data || [];
+        const failures = failuresResponse.data.data || [];
+        
         // Tính toán số lượng hư hỏng chưa giải quyết
-        const unresolvedFailures = failuresResponse.data.filter(failure => !failure.resolved_at).length;
+        const unresolvedFailures = failures.filter(failure => !failure.resolved_at).length;
         
         // Cập nhật state với thống kê
         setStats({
-          assets: assetsResponse.data.length,
-          actions: actionsResponse.data.length,
-          failures: failuresResponse.data.length,
+          assets: assets.length,
+          actions: actions.length,
+          failures: failures.length,
           unresolvedFailures
         });
         
@@ -64,7 +68,7 @@ const Dashboard = () => {
           critical: 0
         };
         
-        failuresResponse.data.forEach(failure => {
+        failures.forEach(failure => {
           if (severityCounts[failure.severity] !== undefined) {
             severityCounts[failure.severity]++;
           }
@@ -72,7 +76,7 @@ const Dashboard = () => {
         
         // Tính toán dữ liệu cho biểu đồ loại tác động
         const actionTypes = {};
-        actionsResponse.data.forEach(action => {
+        actions.forEach(action => {
           if (!actionTypes[action.type]) {
             actionTypes[action.type] = 0;
           }

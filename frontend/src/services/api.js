@@ -11,14 +11,17 @@ const api = axios.create({
   withCredentials: false // Thay đổi thành false để tránh vấn đề CORS
 } );
 
-// Add request interceptor to include auth token
+// Add request interceptor to add auth header
 api.interceptors.request.use(
   (config) => {
     console.log('API Request:', config.method.toUpperCase(), config.url);
     
     const token = localStorage.getItem('token');
     if (token) {
+      console.log('Adding token to request:', token.substring(0, 20) + '...');
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.log('No token found in localStorage');
     }
     return config;
   },
@@ -40,21 +43,23 @@ api.interceptors.response.use(
       console.error('Status:', error.response.status);
       console.error('Data:', error.response.data);
       console.error('Headers:', error.response.headers);
+      
+      // Nếu lỗi là do token hết hạn hoặc không hợp lệ
+      if (error.response.status === 401 || error.response.status === 403) {
+        console.log('Token expired or invalid');
+        // Chỉ xóa token và chuyển hướng nếu không phải đang ở trang login
+        if (!window.location.pathname.includes('/login')) {
+          console.log('Redirecting to login page');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login?expired=true';
+        }
+      }
     } else if (error.request) {
       console.error('Request made but no response received');
       console.error(error.request);
     } else {
       console.error('Error setting up request:', error.message);
-    }
-    
-    // Kiểm tra nếu lỗi là do token hết hạn hoặc không hợp lệ
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Xóa thông tin đăng nhập
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      
-      // Chuyển hướng đến trang đăng nhập
-      window.location.href = '/login?expired=true';
     }
     
     return Promise.reject(error);

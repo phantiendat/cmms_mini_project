@@ -35,22 +35,41 @@ const AssetDetail = () => {
         
         // Tải thông tin tài sản
         const assetResponse = await AssetService.get(id);
-        setAsset(assetResponse.data);
+        console.log('Asset Response:', assetResponse);
+        console.log('Asset Data:', assetResponse.data);
+        setAsset(assetResponse.data.data);
         
         // Tải danh sách tác động
         const actionsResponse = await ActionService.getByAsset(id);
-        setActions(actionsResponse.data);
+        console.log('Actions API URL:', `/actions/asset/${id}`);
+        console.log('Actions Response:', actionsResponse);
+        console.log('Actions Response Data:', actionsResponse.data);
+        console.log('Actions Response Status:', actionsResponse.status);
+        console.log('Actions Response Headers:', actionsResponse.headers);
+        console.log('Actions Data Type:', typeof actionsResponse.data);
+        console.log('Is Actions Array:', Array.isArray(actionsResponse.data));
+        console.log('Actions Data Content:', JSON.stringify(actionsResponse.data, null, 2));
+        setActions(actionsResponse.data || []);
         
         // Tải danh sách hư hỏng
         const failuresResponse = await FailureService.getByAsset(id);
-        setFailures(failuresResponse.data);
+        console.log('Failures Response:', failuresResponse);
+        console.log('Failures Data:', failuresResponse.data);
+        console.log('Failures Data Type:', typeof failuresResponse.data);
+        setFailures(failuresResponse.data.data || []);
         
         // Tải danh sách tài liệu
         const documentsResponse = await DocumentService.getByAsset(id);
-        setDocuments(documentsResponse.data);
+        console.log('Documents Response:', documentsResponse);
+        console.log('Documents Data:', documentsResponse.data);
+        console.log('Documents Data Type:', typeof documentsResponse.data);
+        console.log('Is Documents Array:', Array.isArray(documentsResponse.data));
+        console.log('Documents Data Content:', JSON.stringify(documentsResponse.data, null, 2));
+        setDocuments(documentsResponse.data || []);
         
         setError('');
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError('Failed to fetch asset data. ' + (err.response?.data?.message || err.message));
       } finally {
         setLoading(false);
@@ -196,6 +215,10 @@ const AssetDetail = () => {
                     <Table>
                       <tbody>
                         <tr>
+                          <th>ID</th>
+                          <td>{asset.id}</td>
+                        </tr>
+                        <tr>
                           <th>Code</th>
                           <td>{asset.code}</td>
                         </tr>
@@ -204,26 +227,28 @@ const AssetDetail = () => {
                           <td>{asset.name}</td>
                         </tr>
                         <tr>
-                          <th>Technical Specifications</th>
-                          <td>
-                            {asset.technical_specs ? (
-                              <pre className="mb-0">{JSON.stringify(asset.technical_specs, null, 2)}</pre>
-                            ) : (
-                              <span className="text-muted">Not specified</span>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
                           <th>Location</th>
-                          <td>{asset.location}</td>
+                          <td>{asset.location || 'N/A'}</td>
                         </tr>
                         <tr>
                           <th>System</th>
-                          <td>{asset.system}</td>
+                          <td>{asset.system || 'N/A'}</td>
                         </tr>
                         <tr>
-                          <th>Type</th>
-                          <td>{asset.type}</td>
+                          <th>Technical Specifications</th>
+                          <td>
+                            {typeof asset.specifications === 'object' 
+                              ? Object.entries(asset.specifications).map(([key, value]) => (
+                                  <div key={key} className="mb-1">
+                                    <strong>{key}:</strong> {value}
+                                  </div>
+                                ))
+                              : asset.specifications ? (
+                                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                                    {asset.specifications}
+                                  </div>
+                                ) : 'N/A'}
+                          </td>
                         </tr>
                       </tbody>
                     </Table>
@@ -297,7 +322,8 @@ const AssetDetail = () => {
                           <tr>
                             <th>Date</th>
                             <th>Type</th>
-                            <th>Description</th>
+                            <th>Severity</th>
+                            <th>Status</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -306,7 +332,27 @@ const AssetDetail = () => {
                             <tr key={action.id}>
                               <td>{formatDate(action.performed_at)}</td>
                               <td>{action.type}</td>
-                              <td>{action.description}</td>
+                              <td>
+                                <Badge bg={
+                                  action.severity === 'low' ? 'success' :
+                                  action.severity === 'medium' ? 'warning' :
+                                  action.severity === 'high' ? 'danger' :
+                                  action.severity === 'critical' ? 'dark' : 'secondary'
+                                }>
+                                  {action.severity}
+                                </Badge>
+                              </td>
+                              <td>
+                                <Badge bg={
+                                  action.status === 'Planned' ? 'info' :
+                                  action.status === 'In Progress' ? 'primary' :
+                                  action.status === 'Completed' ? 'success' :
+                                  action.status === 'Cancelled' ? 'danger' :
+                                  action.status === 'On Hold' ? 'warning' : 'secondary'
+                                }>
+                                  {action.status}
+                                </Badge>
+                              </td>
                               <td>
                                 <Link to={`/actions/${action.id}`}>
                                   <Button variant="info" size="sm">View</Button>
@@ -372,6 +418,17 @@ const AssetDetail = () => {
                     )}
                   </Card.Body>
                 </Card>
+              </Col>
+            </Row>
+            
+            <Row className="mt-3">
+              <Col md={12}>
+                <h5>Technical Specifications</h5>
+                <p style={{ whiteSpace: 'pre-wrap' }}>
+                  {typeof asset.specifications === 'object' 
+                    ? JSON.stringify(asset.specifications, null, 2)
+                    : asset.specifications || 'N/A'}
+                </p>
               </Col>
             </Row>
             

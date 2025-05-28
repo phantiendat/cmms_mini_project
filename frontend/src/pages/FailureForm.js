@@ -49,28 +49,32 @@ const FailureForm = () => {
   const [customFields, setCustomFields] = useState('{}');
   // State lưu trữ dữ liệu hư hỏng
   const [failureData, setFailureData] = useState(null);
+  // State lưu trữ mã tài sản
+  const [assetCode, setAssetCode] = useState('');
 
   // Load danh sách assets
   useEffect(() => {
     const fetchAssets = async () => {
       try {
         const response = await AssetService.getAll();
-        setAssets(response.data);
+        setAssets(response.data.data || []);
         
-        // Nếu đang edit và đã có dữ liệu failure, lấy asset code
-        if (id && failureData) {
-          const asset = response.data.find(a => a.id === failureData.asset_id);
+        // Nếu đang edit, lấy asset code
+        if (id && assetIdFromQuery) {
+          const asset = (response.data.data || []).find(a => a.id === assetIdFromQuery);
           if (asset) {
+            setAssetCode(asset.code);
             setFormData(prev => ({ ...prev, asset_id: asset.id }));
           }
         }
       } catch (error) {
         console.error('Failed to fetch assets:', error);
+        setError('Failed to fetch assets. ' + (error.response?.data?.message || error.message));
       }
     };
     
     fetchAssets();
-  }, [id, failureData]);
+  }, [id, assetIdFromQuery]);
 
   // useEffect để tải dữ liệu hư hỏng (nếu ở chế độ chỉnh sửa)
   useEffect(() => {
@@ -80,7 +84,7 @@ const FailureForm = () => {
           setFetchLoading(true);
           setError('');
           const failureResponse = await FailureService.get(id);
-          const fetchedFailureData = failureResponse.data;
+          const fetchedFailureData = failureResponse.data.data;
           setFailureData(fetchedFailureData);
 
           // Định dạng lại ngày tháng và set state
@@ -159,26 +163,10 @@ const FailureForm = () => {
       setError('');
       setSuccess('');
 
-      // Parse custom fields từ JSON string
-      let parsedCustomFields;
-      try {
-        parsedCustomFields = JSON.parse(customFields);
-      } catch (jsonError) {
-        setError('Invalid JSON format in Custom Fields.');
-        setLoading(false);
-        return;
-      }
-
       const submitData = {
         ...formData,
-        resolution_details: resolutionDetails,
-        custom_fields: parsedCustomFields
+        resolution_details: resolutionDetails
       };
-
-      // Đảm bảo resolved_at là null nếu rỗng
-      if (!submitData.resolved_at) {
-        submitData.resolved_at = null;
-      }
 
       if (isEditMode) {
         await FailureService.update(id, submitData);
@@ -186,7 +174,6 @@ const FailureForm = () => {
       } else {
         await FailureService.create(submitData);
         setSuccess('Failure record created successfully');
-        // Reset form sau khi tạo mới
         setFormData({
           asset_id: assetIdFromQuery || '',
           type: '',
@@ -200,16 +187,10 @@ const FailureForm = () => {
           custom_fields: {}
         });
         setResolutionDetails('');
-        setCustomFields('{}');
       }
       
-      // Chuyển hướng về trang danh sách hư hỏng sau 2 giây
       setTimeout(() => {
-        if (assetIdFromQuery) {
-          navigate(`/assets/${assetIdFromQuery}`);
-        } else {
-          navigate('/failures');
-        }
+        navigate('/failures');
       }, 2000);
     } catch (err) {
       setError('Failed to save failure record. ' + (err.response?.data?.message || err.message));
@@ -243,11 +224,7 @@ const FailureForm = () => {
       return;
     }
     
-    if (assetIdFromQuery) {
-      navigate(`/assets/${assetIdFromQuery}`);
-    } else {
-      navigate('/failures');
-    }
+    navigate('/failures');
   };
 
   // Hiển thị spinner khi đang tải dữ liệu
